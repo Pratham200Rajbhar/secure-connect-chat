@@ -5,6 +5,8 @@ import Sidebar from '@/components/chat/Sidebar';
 import ConversationList from '@/components/chat/ConversationList';
 import MessageThread from '@/components/chat/MessageThread';
 import ProfilePanel from '@/components/chat/ProfilePanel';
+import NewChatModal from '@/components/chat/NewChatModal';
+import CreateGroupModal from '@/components/chat/CreateGroupModal';
 
 const ChatApp = () => {
   const [activeTab, setActiveTab] = useState('chats');
@@ -12,6 +14,8 @@ const ChatApp = () => {
   const [showProfile, setShowProfile] = useState(false);
   const [mobileView, setMobileView] = useState<'list' | 'chat'>('list');
   const [msgs, setMsgs] = useState(initialMessages);
+  const [showNewChat, setShowNewChat] = useState(false);
+  const [showCreateGroup, setShowCreateGroup] = useState(false);
 
   const selectedConversation = initialConversations.find((c) => c.id === selectedId);
 
@@ -40,7 +44,6 @@ const ChatApp = () => {
       ...prev,
       [selectedId]: [...(prev[selectedId] || []), newMsg],
     }));
-    // Simulate delivery
     setTimeout(() => {
       setMsgs((prev) => ({
         ...prev,
@@ -49,7 +52,6 @@ const ChatApp = () => {
         ) || [],
       }));
     }, 800);
-    // Simulate read
     setTimeout(() => {
       setMsgs((prev) => ({
         ...prev,
@@ -62,10 +64,13 @@ const ChatApp = () => {
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">
-      {/* Sidebar — desktop only */}
-      <Sidebar activeTab={activeTab} onTabChange={setActiveTab} className="hidden lg:flex" />
+      <Sidebar
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        onNewChat={() => setShowNewChat(true)}
+        className="hidden lg:flex"
+      />
 
-      {/* Conversation List */}
       <div
         className={cn(
           'w-full md:w-[380px] border-r border-border flex-shrink-0',
@@ -79,7 +84,6 @@ const ChatApp = () => {
         />
       </div>
 
-      {/* Message Thread */}
       <div
         className={cn(
           'flex-1 flex flex-col min-w-0',
@@ -109,7 +113,6 @@ const ChatApp = () => {
         )}
       </div>
 
-      {/* Profile Panel — desktop only */}
       {showProfile && selectedConversation && (
         <div className="hidden lg:block w-[340px] border-l border-border flex-shrink-0 animate-slide-in-right">
           <ProfilePanel
@@ -118,6 +121,17 @@ const ChatApp = () => {
           />
         </div>
       )}
+
+      <NewChatModal
+        open={showNewChat}
+        onClose={() => setShowNewChat(false)}
+        onStartChat={(userId) => {
+          const conv = initialConversations.find((c) => c.participants.some((p) => p.id === userId));
+          if (conv) handleSelectConversation(conv.id);
+        }}
+        onCreateGroup={() => { setShowNewChat(false); setShowCreateGroup(true); }}
+      />
+      <CreateGroupModal open={showCreateGroup} onClose={() => setShowCreateGroup(false)} />
     </div>
   );
 };

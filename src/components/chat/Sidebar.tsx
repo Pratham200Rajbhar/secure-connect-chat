@@ -1,27 +1,35 @@
-import { MessageSquare, Users, Phone, Settings, LogOut, Shield, Plus } from 'lucide-react';
+import { MessageSquare, Users, Phone, Settings, LogOut, Shield, Plus, Search, BarChart3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { currentUser } from '@/data/mockData';
 import ChatAvatar from './Avatar';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useNavigate } from 'react-router-dom';
 
 interface SidebarProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
+  onNewChat?: () => void;
   className?: string;
 }
 
 const tabs = [
   { id: 'chats', icon: MessageSquare, label: 'Chats' },
   { id: 'groups', icon: Users, label: 'Groups' },
-  { id: 'calls', icon: Phone, label: 'Calls' },
+  { id: 'calls', icon: Phone, label: 'Calls', route: '/app/calls' },
+  { id: 'search', icon: Search, label: 'Search', route: '/app/search' },
 ];
 
-const bottomActions = [
-  { id: 'settings', icon: Settings, label: 'Settings' },
-  { id: 'logout', icon: LogOut, label: 'Logout' },
-];
+export default function Sidebar({ activeTab, onTabChange, onNewChat, className }: SidebarProps) {
+  const navigate = useNavigate();
 
-export default function Sidebar({ activeTab, onTabChange, className }: SidebarProps) {
+  const handleTabClick = (tab: typeof tabs[0]) => {
+    if (tab.route) {
+      navigate(tab.route);
+    } else {
+      onTabChange(tab.id);
+    }
+  };
+
   return (
     <div className={cn('w-16 flex flex-col items-center py-4 bg-card border-r border-border', className)}>
       {/* Logo */}
@@ -39,7 +47,7 @@ export default function Sidebar({ activeTab, onTabChange, className }: SidebarPr
       {/* New Chat */}
       <Tooltip>
         <TooltipTrigger asChild>
-          <button className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center mb-6 hover:bg-primary/90 transition-colors">
+          <button onClick={onNewChat} className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center mb-6 hover:bg-primary/90 transition-colors">
             <Plus className="w-5 h-5 text-primary-foreground" />
           </button>
         </TooltipTrigger>
@@ -52,7 +60,7 @@ export default function Sidebar({ activeTab, onTabChange, className }: SidebarPr
           <Tooltip key={tab.id}>
             <TooltipTrigger asChild>
               <button
-                onClick={() => onTabChange(tab.id)}
+                onClick={() => handleTabClick(tab)}
                 className={cn(
                   'w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200',
                   activeTab === tab.id
@@ -70,16 +78,30 @@ export default function Sidebar({ activeTab, onTabChange, className }: SidebarPr
 
       {/* Bottom Actions */}
       <div className="flex flex-col gap-1">
-        {bottomActions.map((action) => (
-          <Tooltip key={action.id}>
-            <TooltipTrigger asChild>
-              <button className="w-10 h-10 rounded-xl flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-all duration-200">
-                <action.icon className="w-5 h-5" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="right">{action.label}</TooltipContent>
-          </Tooltip>
-        ))}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button onClick={() => navigate('/app/admin')} className="w-10 h-10 rounded-xl flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-all duration-200">
+              <BarChart3 className="w-5 h-5" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="right">Admin</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button onClick={() => navigate('/app/settings')} className="w-10 h-10 rounded-xl flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-all duration-200">
+              <Settings className="w-5 h-5" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="right">Settings</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button className="w-10 h-10 rounded-xl flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-all duration-200">
+              <LogOut className="w-5 h-5" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="right">Logout</TooltipContent>
+        </Tooltip>
       </div>
     </div>
   );
